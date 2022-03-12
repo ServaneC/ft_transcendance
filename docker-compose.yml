@@ -1,0 +1,61 @@
+version: "3.7"
+
+services:
+  front:
+    image: front_img
+    build: ./front
+    ports:
+      - "8080:8080"
+    volumes: 
+      - ./front:/app
+      - /app/node_modules
+    environment: 
+      HOST: 0.0.0.0
+
+  back:
+    image: back_img
+    restart: always
+    build: ./back
+    ports:
+      - "3000:3000"
+    environment: 
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./back:/app
+      - /app/node_modules
+    depends_on: 
+      - postgres
+
+  postgres:
+    image: postgres
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+
+  pgadmin:
+    image: dpage/pgadmin4
+    volumes: 
+      - pgAdmin_data:/var/lib/pgadmin
+    ports: 
+      - "5050:5050"
+    environment: 
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.fr
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_LISTEN_PORT=5050
+    depends_on:
+      - postgres
+
+volumes:
+  db_data:
+    driver: local
+  pgAdmin_data:
+    driver: local
